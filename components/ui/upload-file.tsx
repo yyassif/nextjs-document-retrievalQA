@@ -1,4 +1,3 @@
-import { useSession } from "@/components/providers/supabase";
 import { extractDocumentContent } from "@/lib/pdf-content-extractor";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -14,13 +13,11 @@ export default function UploadFile({
   shouldNarrow: boolean;
 }) {
   const supabase = createClient();
-  const session = useSession();
-  const profile_id = session?.user.id as string;
   const [uploading, setUploading] = useState<boolean>(false);
   const router = useRouter();
 
   const uploadSocket = useCallback(async () => {
-    const channel = supabase.channel(`upload:${profile_id}`);
+    const channel = supabase.channel(`upload`);
     channel
       .on("broadcast", { event: "upload:complete" }, ({ payload }) => {
         setUploading(false);
@@ -66,7 +63,6 @@ export default function UploadFile({
             body: JSON.stringify({
               document_name: file.name,
               file_key: data.path,
-              profile_id,
               content,
             }),
             cache: "no-store",
