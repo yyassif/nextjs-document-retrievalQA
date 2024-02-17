@@ -43,13 +43,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const supabase = createClient();
-  const { data } = await supabase.from("documents").select("*");
+  const { data } = await supabase.from("conversations").select("*");
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
         <PDFJSWprker>
-          <Home documents={data}>{children}</Home>
+          <Home conversations={data}>{children}</Home>
         </PDFJSWprker>
       </body>
     </html>

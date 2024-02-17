@@ -18,7 +18,7 @@ export const runtime = "edge";
 
 interface IRetrievalAgentsBody {
   messages: Message[];
-  document_id: string;
+  conversation_id: string;
 }
 
 function parseMessages(messages: Message[]) {
@@ -40,18 +40,18 @@ const ratelimit = new Ratelimit({
 
 export async function POST(req: Request) {
   const body = (await req.json()) as IRetrievalAgentsBody;
-  const { messages, document_id } = body;
+  const { messages, conversation_id } = body;
   const currentMessageContent = messages[messages.length - 1].content;
 
   // Ratelimiting the request
-  const { success } = await ratelimit.limit(`retrieval`);
+  const { success } = await ratelimit.limit("retrieval");
 
   const client = createClient();
 
-  await client.from("document_messages").insert([
+  await client.from("messages").insert([
     {
       body: currentMessageContent,
-      document_id,
+      conversation_id,
       role: "user",
     },
   ]);
@@ -84,11 +84,8 @@ export async function POST(req: Request) {
 
   const store = new SupabaseVectorStore(new OpenAIEmbeddings(), {
     client,
-    tableName: "document_chunks",
+    tableName: "documents",
     queryName: "match_documents",
-    filter: {
-      document_id,
-    },
   });
 
   // Extract a standalone question to later query the vector db.
@@ -139,10 +136,10 @@ CONTEXT: ${contextString}
           {
             handleLLMEnd: async (output) => {
               data.close();
-              await client.from("document_messages").insert([
+              await client.from("messages").insert([
                 {
                   body: output.generations[0][0].text,
-                  document_id,
+                  conversation_id,
                   role: "assistant",
                 },
               ]);

@@ -2,7 +2,7 @@
 
 import { Loading, showConfirm } from "@/components/ui/ui-lib";
 import { isIOS, useMobileScreen } from "@/hooks/utils";
-import { PDFDocument } from "@/types/supa.tables";
+import { Conversation } from "@/types/supa.tables";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icons } from "../icons";
@@ -15,7 +15,8 @@ import {
   MIN_SIDEBAR_WIDTH,
   NARROW_SIDEBAR_WIDTH,
 } from "@/lib/constants";
-import UploadFile from "./upload-file";
+import NewConversation from "./new-conversation";
+import UploadLink from "./upload-link";
 
 const ChatList = dynamic(async () => (await import("./chat-list")).ChatList, {
   loading: () => <Loading />,
@@ -90,7 +91,7 @@ function useDragSideBar() {
 }
 
 export default function Sidebar(props: {
-  documents: PDFDocument[];
+  conversations: Conversation[];
   className?: string;
 }) {
   const { onDragStart, shouldNarrow } = useDragSideBar();
@@ -107,6 +108,7 @@ export default function Sidebar(props: {
       }`}
       style={{
         transition: isMobileScreen && isIOSMobile ? "none" : "",
+        marginTop: "8px",
       }}
     >
       <div className={styles["sidebar-header"]}>
@@ -119,7 +121,8 @@ export default function Sidebar(props: {
         </div>
       </div>
 
-      <UploadFile shouldNarrow={shouldNarrow} />
+      <UploadLink shouldNarrow={shouldNarrow} />
+      <NewConversation shouldNarrow={shouldNarrow} />
       <div
         className={styles["sidebar-body"]}
         onClick={(e) => {
@@ -128,7 +131,10 @@ export default function Sidebar(props: {
           }
         }}
       >
-        <ChatList documents={props.documents} narrow={shouldNarrow} />
+        <span style={{ textTransform: "capitalize", marginBottom: "8px" }}>
+          Conversations
+        </span>
+        <ChatList conversations={props.conversations} narrow={shouldNarrow} />
       </div>
 
       <div className={styles["sidebar-tail"]}>

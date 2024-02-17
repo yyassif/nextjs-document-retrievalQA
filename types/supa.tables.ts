@@ -1,3 +1,4 @@
-export type PDFDocument = SupaTypes["public"]["Tables"]["documents"]["Row"];
-export type PDFMessage =
-  SupaTypes["public"]["Tables"]["document_messages"]["Row"];
+export type Message = SupaTypes["public"]["Tables"]["messages"]["Row"];
+export type Document = SupaTypes["public"]["Tables"]["documents"]["Row"];
+export type Conversation =
+  SupaTypes["public"]["Tables"]["conversations"]["Row"];

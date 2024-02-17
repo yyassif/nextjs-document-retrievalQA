@@ -2,7 +2,7 @@
 
 import { useMobileScreen } from "@/hooks/utils";
 import { createClient } from "@/lib/supabase/client";
-import { PDFDocument } from "@/types/supa.tables";
+import { Conversation } from "@/types/supa.tables";
 import { usePathname, useRouter } from "next/navigation";
 import { Icons } from "../icons";
 import { Avatar } from "./emoji";
@@ -53,7 +53,7 @@ export function ChatItem(props: {
 }
 
 export function ChatList(props: {
-  documents: PDFDocument[];
+  conversations: Conversation[];
   narrow?: boolean;
 }) {
   const supabase = createClient();
@@ -63,9 +63,9 @@ export function ChatList(props: {
 
   return (
     <div className={styles["chat-list"]}>
-      {props.documents?.map((item, i) => (
+      {props.conversations?.map((item, i) => (
         <ChatItem
-          title={item.document_name}
+          title={item.name}
           time={new Date(item.created_at).toLocaleString()}
           key={item.id}
           id={item.id}
@@ -79,7 +79,7 @@ export function ChatList(props: {
               (!props.narrow && !isMobileScreen) ||
               (await showConfirm("Delete this conversation?"))
             ) {
-              await supabase.from("documents").delete().eq("id", item.id);
+              await supabase.from("conversations").delete().eq("id", item.id);
             }
           }}
           narrow={props.narrow}

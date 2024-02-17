@@ -2,16 +2,16 @@
 
 import useTheme from "@/hooks/use-theme";
 import { getCSSVar, useMobileScreen } from "@/hooks/utils";
-import { PDFDocument } from "@/types/supa.tables";
+import { Conversation } from "@/types/supa.tables";
 import { useEffect } from "react";
 import styles from "./home.module.scss";
 import Sidebar from "./sidebar";
 
 export default function Home({
-  documents,
+  conversations,
   children,
 }: {
-  documents: PDFDocument[];
+  conversations: Conversation[];
   children: React.ReactNode;
 }) {
   const isMobileScreen = useMobileScreen();
@@ -49,7 +49,10 @@ export default function Home({
         !isMobileScreen ? styles["tight-container"] : styles.container
       }`}
     >
-      <Sidebar documents={documents} className={styles["sidebar-show"]} />
+      <Sidebar
+        conversations={conversations}
+        className={styles["sidebar-show"]}
+      />
       <div className={styles["window-content"]} id="app-body">
         {children}
       </div>

@@ -3,14 +3,13 @@ import { redirect } from "next/navigation";
 
 export default async function Page() {
   const supabase = createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("conversations")
+    .insert([{}])
     .select("id")
-    .order("created_at", { ascending: false })
-    .limit(1)
     .single();
 
-  if (!data) {
+  if (!data || error) {
     redirect("/upload");
   } else {
     redirect(`/chat/${data.id}`);

@@ -1,7 +1,7 @@
 import { openAIEmbedding } from "@/lib/pdf-chat/openai";
 import { convertToAscii } from "@/lib/utils";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { pipeline } from "@xenova/transformers";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 export const generateEmbeddings = async (content: string[]) => {
   const splitter = new RecursiveCharacterTextSplitter({

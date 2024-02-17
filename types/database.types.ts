@@ -6,94 +6,79 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
-      document_chunks: {
+      conversations: {
         Row: {
-          content: string;
+          created_at: string;
+          id: string;
+          name: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+        };
+        Relationships: [];
+      };
+      documents: {
+        Row: {
+          content: string | null;
           embedding: string | null;
           id: number;
           metadata: Json | null;
         };
         Insert: {
-          content: string;
+          content?: string | null;
           embedding?: string | null;
           id?: number;
           metadata?: Json | null;
         };
         Update: {
-          content?: string;
+          content?: string | null;
           embedding?: string | null;
           id?: number;
           metadata?: Json | null;
         };
         Relationships: [];
       };
-      document_messages: {
+      messages: {
         Row: {
           body: string | null;
+          conversation_id: string;
           created_at: string;
-          document_id: string;
           id: string;
           role: Database["public"]["Enums"]["user_assistant_enum"] | null;
         };
         Insert: {
           body?: string | null;
+          conversation_id: string;
           created_at?: string;
-          document_id: string;
           id?: string;
           role?: Database["public"]["Enums"]["user_assistant_enum"] | null;
         };
         Update: {
           body?: string | null;
+          conversation_id?: string;
           created_at?: string;
-          document_id?: string;
           id?: string;
           role?: Database["public"]["Enums"]["user_assistant_enum"] | null;
         };
         Relationships: [
           {
-            foreignKeyName: "document_messages_document_id_fkey";
-            columns: ["document_id"];
+            foreignKeyName: "messages_conversation_id_fkey";
+            columns: ["conversation_id"];
             isOneToOne: false;
-            referencedRelation: "documents";
+            referencedRelation: "conversations";
             referencedColumns: ["id"];
           }
         ];
-      };
-      documents: {
-        Row: {
-          content: string | null;
-          created_at: string;
-          document_name: string;
-          embedding: string | null;
-          file_key: string | null;
-          id: string;
-          metadata: Json | null;
-          title: string;
-        };
-        Insert: {
-          content?: string | null;
-          created_at?: string;
-          document_name: string;
-          embedding?: string | null;
-          file_key?: string | null;
-          id?: string;
-          metadata?: Json | null;
-          title: string;
-        };
-        Update: {
-          content?: string | null;
-          created_at?: string;
-          document_name?: string;
-          embedding?: string | null;
-          file_key?: string | null;
-          id?: string;
-          metadata?: Json | null;
-          title?: string;
-        };
-        Relationships: [];
       };
     };
     Views: {
@@ -122,7 +107,7 @@ export interface Database {
       [_ in never]: never;
     };
   };
-}
+};
 
 export type Tables<
   PublicTableNameOrOptions extends

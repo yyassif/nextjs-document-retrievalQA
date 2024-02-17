@@ -1,7 +1,10 @@
 "use client";
 
 import { autoGrowTextArea, useMobileScreen } from "@/hooks/utils";
-import { PDFDocument, PDFMessage } from "@/types/supa.tables";
+import {
+  Conversation,
+  Message as ConversationMessage,
+} from "@/types/supa.tables";
 import { Message, useChat } from "ai/react";
 import dynamic from "next/dynamic";
 import { Fragment, useEffect, useRef, useState } from "react";
@@ -52,8 +55,8 @@ export default function Chat({
   initialMessages,
 }: {
   chatId: string;
-  conversation: PDFDocument;
-  initialMessages: PDFMessage[];
+  conversation: Conversation;
+  initialMessages: ConversationMessage[];
 }) {
   const [inputRows, setInputRows] = useState(2);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -87,7 +90,7 @@ export default function Chat({
   } = useChat({
     api: "/api/retrieval",
     body: {
-      document_id: chatId,
+      conversation_id: chatId,
     },
     onError: (e) => {
       showToast("API Failed");
@@ -120,7 +123,7 @@ export default function Chat({
           <div
             className={`window-header-main-title ${styles["chat-body-main-title"]}`}
           >
-            {conversation.document_name}
+            {conversation.name}
           </div>
           <div className="window-header-sub-title">
             {messages.length} Messages

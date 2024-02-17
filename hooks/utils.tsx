@@ -44,8 +44,11 @@ export function readFromFile() {
 }
 
 export function isIOS() {
-  const userAgent = navigator.userAgent.toLowerCase();
-  return /iphone|ipad|ipod/.test(userAgent);
+  if (typeof navigator !== "undefined") {
+    const userAgent = navigator.userAgent.toLowerCase();
+    return /iphone|ipad|ipod/.test(userAgent);
+  }
+  return false;
 }
 
 export function useWindowSize() {

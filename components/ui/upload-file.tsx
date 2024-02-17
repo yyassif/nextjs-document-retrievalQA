@@ -6,12 +6,9 @@ import { useDropzone } from "react-dropzone";
 import { Icons } from "../icons";
 import { IconButton } from "./button";
 import { showToast } from "./ui-lib";
+import styles from "./upload-file.module.scss";
 
-export default function UploadFile({
-  shouldNarrow,
-}: {
-  shouldNarrow: boolean;
-}) {
+export default function UploadFile() {
   const supabase = createClient();
   const [uploading, setUploading] = useState<boolean>(false);
   const router = useRouter();
@@ -19,11 +16,9 @@ export default function UploadFile({
   const uploadSocket = useCallback(async () => {
     const channel = supabase.channel(`upload`);
     channel
-      .on("broadcast", { event: "upload:complete" }, ({ payload }) => {
+      .on("broadcast", { event: "upload:complete" }, () => {
         setUploading(false);
-
-        const { id } = payload;
-        router.push(`/chat/${id}`);
+        router.refresh();
       })
       .on("broadcast", { event: "upload:progress" }, ({ payload }) => {
         showToast(payload.message);
@@ -45,24 +40,26 @@ export default function UploadFile({
       setUploading(true);
       const file = acceptedFiles[0];
 
-      const { data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from("documents")
         .upload(`public/${file.name}`, file, {
           cacheControl: "3600",
           upsert: false,
         });
 
-      console.log(data);
+      if (uploadError) {
+        setUploading(false);
+        showToast("Document already exists");
+        return;
+      }
 
       showToast("Extracting document content...");
 
       const { response, error } = await extractDocumentContent(file).then(
         async (content) => {
-          const response = await fetch("/api/embed-docs", {
+          const response = await fetch("/api/embeddings", {
             method: "POST",
             body: JSON.stringify({
-              document_name: file.name,
-              file_key: data.path,
               content,
             }),
             cache: "no-store",
@@ -75,6 +72,7 @@ export default function UploadFile({
       );
 
       if (error) {
+        setUploading(false);
         showToast("Error uploading document");
         return;
       }
@@ -82,10 +80,10 @@ export default function UploadFile({
       if (response?.status === 200) {
         await uploadSocket();
         router.refresh();
-        showToast("PDF Chat created!");
+        setUploading(false);
+        showToast("PDF uploaded successfully");
         return;
       }
-      setUploading(false);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [uploadSocket]
@@ -95,12 +93,13 @@ export default function UploadFile({
     onDrop,
     multiple: false,
     maxFiles: 1,
-    maxSize: 32 * 1024 * 1024, // 32MB
+    maxSize: 64 * 1024 * 1024, // 64MB
     accept: { "application/pdf": [".pdf"] },
   });
 
   return (
-    <div
+    <section
+      className={styles.mainsection}
       style={{
         width: "100%",
         margin: "16px 0",
@@ -108,27 +107,70 @@ export default function UploadFile({
       }}
       {...getRootProps()}
     >
-      <IconButton
-        className="upload-button"
-        icon={
-          uploading ? (
-            <Icons.threeDots
-              size={22}
-              style={{ color: "white !important" }}
-              fontSize={22}
+      <div className="container">
+        <header>
+          <h1 style={{ display: "flex" }}>
+            <Icons.up
+              size={32}
+              fontSize={32}
+              style={{
+                width: "32px",
+                height: "32px",
+                margin: "0 10px 0",
+                padding: 0,
+              }}
             />
-          ) : (
-            <Icons.add
-              size={22}
-              style={{ color: "white !important" }}
-              fontSize={22}
-            />
-          )
-        }
-        text={shouldNarrow || uploading ? undefined : "Upload Document"}
-        shadow
-      />
-      <input {...getInputProps()} />
-    </div>
+            <span>Upload your PDF file</span>
+          </h1>
+        </header>
+        <div className="dropArea">
+          <div className="contentHolder">
+            <p id="dropText">Drag & Drop your files</p>
+            <p>Or</p>
+            <input {...getInputProps()} />
+            <div
+              style={{
+                width: "100%",
+              }}
+            >
+              <IconButton
+                className="upload-button"
+                icon={
+                  uploading ? (
+                    <Icons.threeDots
+                      size={22}
+                      style={{ color: "white !important" }}
+                      fontSize={22}
+                    />
+                  ) : (
+                    <Icons.add
+                      size={22}
+                      style={{ color: "white !important" }}
+                      fontSize={22}
+                    />
+                  )
+                }
+                text={uploading ? "Uploading" : "Click here To Upload"}
+                shadow
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
+}
+
+{
+  /* <div
+      
+      >
+        <IconButton
+          className="upload-button"
+          icon=
+          text={shouldNarrow || uploading ? undefined : "Upload Document"}
+          shadow
+        />
+        
+      </div> */
 }

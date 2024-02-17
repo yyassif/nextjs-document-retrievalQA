@@ -11,8 +11,6 @@ export const runtime = "edge";
 
 interface IngestionBody {
   content: string[];
-  file_key: string;
-  document_name: string;
 }
 
 // Create a new rate-limiter for document embedding
@@ -26,7 +24,7 @@ export async function POST(request: Request) {
   try {
     const supabase = createClient();
     const body = (await request.json()) as IngestionBody;
-    const { content, file_key, document_name } = body;
+    const { content } = body;
 
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === "") {
       return Response.json(
@@ -39,7 +37,7 @@ export async function POST(request: Request) {
       process.env.UPSTASH_REDIS_REST_URL &&
       process.env.UPSTASH_REDIS_REST_TOKEN
     ) {
-      const { success } = await ratelimit.limit(`embed-docs`);
+      const { success } = await ratelimit.limit("embeddings");
 
       if (!success) {
         return Response.json({ error: "TO_MANY_REQUESTS" }, { status: 429 });
@@ -60,8 +58,6 @@ export async function POST(request: Request) {
       supabase,
       channel,
       content,
-      file_key,
-      document_name,
     });
 
     return Response.json({ ok: true }, { status: 200 });

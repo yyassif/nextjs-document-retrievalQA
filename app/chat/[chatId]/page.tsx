@@ -1,33 +1,33 @@
 import Chat from "@/components/ui/chat";
 import { createClient } from "@/lib/supabase/server";
-import { PDFDocument } from "@/types/supa.tables";
+import { Conversation } from "@/types/supa.tables";
 import { redirect } from "next/navigation";
 
-interface IChatPageProps {
+interface IConversationProps {
   params: {
     chatId: string;
   };
 }
 
-export default async function Page({ params }: IChatPageProps) {
+export default async function Page({ params }: IConversationProps) {
   const supabase = createClient();
 
   // Initial posts
   const { data, error } = await supabase
-    .from("documents")
-    .select("*, document_messages(*)")
+    .from("conversations")
+    .select("*, messages(*)")
     .eq("id", params.chatId)
     .single();
 
   if (!data || error) {
-    redirect("/");
+    redirect("/upload");
   }
 
   return (
     <Chat
       chatId={params.chatId}
-      conversation={data as PDFDocument}
-      initialMessages={data.document_messages}
+      conversation={data as Conversation}
+      initialMessages={data.messages}
     />
   );
 }
