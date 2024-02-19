@@ -16,7 +16,7 @@ interface IngestionBody {
 // Create a new rate-limiter for document embedding
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(20, "1 d"),
+  limiter: Ratelimit.slidingWindow(100, "1 d"),
   analytics: true,
 });
 
