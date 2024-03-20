@@ -4,6 +4,7 @@ import EmojiPicker, {
   Theme as EmojiTheme,
 } from "emoji-picker-react";
 import { Icons } from "../icons";
+import useTheme from "@/hooks/use-theme";
 
 export function getEmojiUrl(unified: string, style: EmojiStyle) {
   return `https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/${style}/64/${unified}.png`;
@@ -24,11 +25,20 @@ export function AvatarPicker(props: {
   );
 }
 
-export function Avatar(props: { model?: any; avatar?: string }) {
+export function Avatar(props: { model?: boolean; user?: boolean; avatar?: string }) {
+  const { theme } = useTheme()
   if (props.model) {
     return (
-      <div className="no-dark">
-        <Icons.blackBot className="user-avatar" />
+      <div>
+        <Icons.assistant className="user-avatar" fill={theme === "dark" ? "#FFF" : "#000"} />
+      </div>
+    );
+  }
+
+  if (props.user) {
+    return (
+      <div>
+        <Icons.doctor className="user-avatar" fill={theme === "dark" ? "#FFF" : "#000"} />
       </div>
     );
   }

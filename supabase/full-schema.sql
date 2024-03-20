@@ -23,11 +23,12 @@ create table public.messages (
 comment on table public.messages is 'Messages content for each conversation.';
 
 -- Create the table for the documents to store the content and metadata Chunks of the PDFs
-create table documents (
+create table public.documents (
   id bigserial primary key,
   content text, -- corresponds to Document.pageContent
   metadata jsonb, -- corresponds to Document.metadata
-  embedding vector(1536) -- 1536 works for OpenAI embeddings
+  embedding vector(1536), -- 1536 works for OpenAI embeddings
+  ollama_embedding vector(768) -- 768 works for Ollama embeddings
 );
 comment on table public.documents is 'PDF Documents pertaining to a Document Chunk.';
 
@@ -58,12 +59,38 @@ begin return query
 end;
 $$ language plpgsql security definer;
 
+-- Create a function to search for documents for ollama
+create or replace function public.match_ollama_documents(
+  query_embedding vector(768),
+  match_count int DEFAULT 5,
+  filter jsonb DEFAULT '{}'
+) returns table (
+  id bigint,
+  content text,
+  metadata jsonb,
+  embedding jsonb,
+  similarity float
+) as $$
+begin return query
+  select
+    documents.id as id,
+    documents.content as content,
+    documents.metadata as metadata,
+    (documents.ollama_embedding::text)::jsonb as embedding,
+    1 - (documents.ollama_embedding <=> query_embedding) as similarity
+  from documents
+  where documents.metadata @> filter
+  order by documents.ollama_embedding <=> query_embedding
+  limit match_count;
+end;
+$$ language plpgsql security definer;
+
 -- Secure the tables by Enabling the Row Level Security
 alter table public.conversations enable row level security;
 alter table public.messages enable row level security;
 alter table public.documents enable row level security;
 
--- Documents Policies
+-- Conversations Policies
 create policy "Allow public select access" on public.conversations for select using ( true );
 create policy "Allow public insert access" on public.conversations for insert with check ( true );
 create policy "Allow public update access" on public.conversations for update using ( true );

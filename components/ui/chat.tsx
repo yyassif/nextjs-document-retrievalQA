@@ -153,9 +153,9 @@ export default function Chat({
                   <div className={styles["chat-message-header"]}>
                     <div className={styles["chat-message-avatar"]}>
                       {isUser ? (
-                        <Avatar avatar={"1f603"} />
+                        <Avatar user />
                       ) : (
-                        <Avatar avatar="2699-fe0f" />
+                        <Avatar model />
                       )}
                     </div>
                   </div>

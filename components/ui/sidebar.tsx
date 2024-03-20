@@ -17,6 +17,7 @@ import {
 } from "@/lib/constants";
 import NewConversation from "./new-conversation";
 import UploadLink from "./upload-link";
+import { ThemeToggle } from "./theme-toggle";
 
 const ChatList = dynamic(async () => (await import("./chat-list")).ChatList, {
   loading: () => <Loading />,
@@ -117,7 +118,7 @@ export default function Sidebar(props: {
           Your Medical-AI Assistant.
         </div>
         <div className={styles["sidebar-logo"] + " no-dark"}>
-          <Icons.chatgpt />
+          <Icons.logo />
         </div>
       </div>
 
@@ -138,6 +139,7 @@ export default function Sidebar(props: {
       </div>
 
       <div className={styles["sidebar-tail"]}>
+        <ThemeToggle />
         <div className={styles["sidebar-actions"]}>
           <div className={styles["sidebar-action"] + " " + styles.mobile}>
             <IconButton

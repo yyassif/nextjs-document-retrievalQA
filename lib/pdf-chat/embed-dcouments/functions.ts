@@ -3,6 +3,8 @@ import { ChunkType } from "@/types";
 import { RealtimeChannel, SupabaseClient } from "@supabase/supabase-js";
 import SqlString from "sqlstring";
 
+const shouldUseOllama = process.env.RUN_LOCALLY_ON_PREMISE == "True";
+
 export async function processDocumentInBackground({
   supabase,
   channel,
@@ -15,24 +17,40 @@ export async function processDocumentInBackground({
   sendProgress(channel, "Saving document details...");
 
   const chunks = await generateEmbeddings(content);
-
+  
   messageForLongDocs(chunks, channel);
 
   const { content: texts, embeddings } = chunks;
-
-  const { error } = await supabase.from("documents").insert(
-    texts.map((value, index) => ({
-      content: SqlString.escape(value),
-      embedding: JSON.stringify(embeddings[index]),
-      metadata: {
-        index,
-      },
-    }))
-  );
-
-  if (error) {
-    sendError(channel, error.message);
-    return;
+  if (shouldUseOllama) {
+    const { error } = await supabase.from("documents").insert(
+      texts.map((value, index) => ({
+        content: SqlString.escape(value),
+        ollama_embedding: JSON.stringify(embeddings[index]),
+        metadata: {
+          index,
+        },
+      }))
+    );
+    if (error) {
+      console.error("Couldn't insert embeddings", error)
+      sendError(channel, error.message);
+      return;
+    }
+  } else {
+    const { error } = await supabase.from("documents").insert(
+      texts.map((value, index) => ({
+        content: SqlString.escape(value),
+        embedding: JSON.stringify(embeddings[index]),
+        metadata: {
+          index,
+        },
+      }))
+    );
+    if (error) {
+      console.error("Couldn't insert embeddings", error)
+      sendError(channel, error.message);
+      return;
+    }
   }
 
   channel.send({

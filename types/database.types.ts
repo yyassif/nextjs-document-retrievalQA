@@ -4,110 +4,127 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[];
+  | Json[]
 
 export type Database = {
   public: {
     Tables: {
       conversations: {
         Row: {
-          created_at: string;
-          id: string;
-          name: string;
-        };
+          created_at: string
+          id: string
+          name: string
+        }
         Insert: {
-          created_at?: string;
-          id?: string;
-          name?: string;
-        };
+          created_at?: string
+          id?: string
+          name?: string
+        }
         Update: {
-          created_at?: string;
-          id?: string;
-          name?: string;
-        };
-        Relationships: [];
-      };
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
-          content: string | null;
-          embedding: string | null;
-          id: number;
-          metadata: Json | null;
-        };
+          content: string | null
+          embedding: string | null
+          id: number
+          metadata: Json | null
+          ollama_embedding: string | null
+        }
         Insert: {
-          content?: string | null;
-          embedding?: string | null;
-          id?: number;
-          metadata?: Json | null;
-        };
+          content?: string | null
+          embedding?: string | null
+          id?: number
+          metadata?: Json | null
+          ollama_embedding?: string | null
+        }
         Update: {
-          content?: string | null;
-          embedding?: string | null;
-          id?: number;
-          metadata?: Json | null;
-        };
-        Relationships: [];
-      };
+          content?: string | null
+          embedding?: string | null
+          id?: number
+          metadata?: Json | null
+          ollama_embedding?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
-          body: string | null;
-          conversation_id: string;
-          created_at: string;
-          id: string;
-          role: Database["public"]["Enums"]["user_assistant_enum"] | null;
-        };
+          body: string | null
+          conversation_id: string
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_assistant_enum"] | null
+        }
         Insert: {
-          body?: string | null;
-          conversation_id: string;
-          created_at?: string;
-          id?: string;
-          role?: Database["public"]["Enums"]["user_assistant_enum"] | null;
-        };
+          body?: string | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_assistant_enum"] | null
+        }
         Update: {
-          body?: string | null;
-          conversation_id?: string;
-          created_at?: string;
-          id?: string;
-          role?: Database["public"]["Enums"]["user_assistant_enum"] | null;
-        };
+          body?: string | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_assistant_enum"] | null
+        }
         Relationships: [
           {
-            foreignKeyName: "messages_conversation_id_fkey";
-            columns: ["conversation_id"];
-            isOneToOne: false;
-            referencedRelation: "conversations";
-            referencedColumns: ["id"];
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
           }
-        ];
-      };
-    };
+        ]
+      }
+    }
     Views: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Functions: {
       match_documents: {
         Args: {
-          query_embedding: string;
-          match_count?: number;
-          filter?: Json;
-        };
+          query_embedding: string
+          match_count?: number
+          filter?: Json
+        }
         Returns: {
-          id: number;
-          content: string;
-          metadata: Json;
-          embedding: Json;
-          similarity: number;
-        }[];
-      };
-    };
+          id: number
+          content: string
+          metadata: Json
+          embedding: Json
+          similarity: number
+        }[]
+      }
+      match_ollama_documents: {
+        Args: {
+          query_embedding: string
+          match_count?: number
+          filter?: Json
+        }
+        Returns: {
+          id: number
+          content: string
+          metadata: Json
+          embedding: Json
+          similarity: number
+        }[]
+      }
+    }
     Enums: {
-      user_assistant_enum: "user" | "assistant";
-    };
+      user_assistant_enum: "user" | "assistant"
+    }
     CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
-};
+      [_ in never]: never
+    }
+  }
+}
 
 export type Tables<
   PublicTableNameOrOptions extends
@@ -120,7 +137,7 @@ export type Tables<
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R;
+      Row: infer R
     }
     ? R
     : never
@@ -128,11 +145,11 @@ export type Tables<
       Database["public"]["Views"])
   ? (Database["public"]["Tables"] &
       Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R;
+      Row: infer R
     }
     ? R
     : never
-  : never;
+  : never
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
@@ -143,17 +160,17 @@ export type TablesInsert<
     : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I;
+      Insert: infer I
     }
     ? I
     : never
   : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
   ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I;
+      Insert: infer I
     }
     ? I
     : never
-  : never;
+  : never
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
@@ -164,17 +181,17 @@ export type TablesUpdate<
     : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U;
+      Update: infer U
     }
     ? U
     : never
   : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
   ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U;
+      Update: infer U
     }
     ? U
     : never
-  : never;
+  : never
 
 export type Enums<
   PublicEnumNameOrOptions extends
@@ -187,4 +204,4 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
-  : never;
+  : never
