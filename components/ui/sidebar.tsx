@@ -16,8 +16,8 @@ import {
   NARROW_SIDEBAR_WIDTH,
 } from "@/lib/constants";
 import NewConversation from "./new-conversation";
-import UploadLink from "./upload-link";
 import { ThemeToggle } from "./theme-toggle";
+import UploadLink from "./upload-link";
 
 const ChatList = dynamic(async () => (await import("./chat-list")).ChatList, {
   loading: () => <Loading />,
@@ -113,9 +113,9 @@ export default function Sidebar(props: {
       }}
     >
       <div className={styles["sidebar-header"]}>
-        <div className={styles["sidebar-title"]}>MedicalChat</div>
+        <div className={styles["sidebar-title"]}>MedMaintBot</div>
         <div className={styles["sidebar-sub-title"]}>
-          Your Medical-AI Assistant.
+          Your Maintenance-AI Assistant.
         </div>
         <div className={styles["sidebar-logo"] + " no-dark"}>
           <Icons.logo />

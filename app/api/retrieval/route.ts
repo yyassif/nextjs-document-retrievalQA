@@ -8,11 +8,15 @@ import {
   experimental_StreamData,
 } from "ai";
 
-import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
-import { HumanMessage, SystemMessage, AIMessage } from "@langchain/core/messages";
-import { BytesOutputParser } from "@langchain/core/output_parsers";
-import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 import { OllamaEmbeddings } from "@langchain/community/embeddings/ollama";
+import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
+import {
+  AIMessage,
+  HumanMessage,
+  SystemMessage,
+} from "@langchain/core/messages";
+import { BytesOutputParser } from "@langchain/core/output_parsers";
+import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 
 export const runtime = "edge";
 
@@ -47,7 +51,8 @@ export async function POST(req: Request) {
     // Ratelimiting the request
     const { success } = await ratelimit.limit("retrieval");
 
-    const shouldUseOllama = !success || process.env.RUN_LOCALLY_ON_PREMISE == "True";
+    const shouldUseOllama =
+      !success || process.env.RUN_LOCALLY_ON_PREMISE == "True";
 
     const client = createClient();
 
@@ -60,36 +65,48 @@ export async function POST(req: Request) {
     ]);
 
     const searchModel = new ChatOpenAI({
-        configuration: {
-          baseURL: shouldUseOllama ? process.env.OLLAMA_BASE_URL as string : "https://api.openai.com/v1",
-          apiKey: shouldUseOllama ? "ollama" as string : process.env.OPENAI_API_KEY,
-        },
-          modelName: shouldUseOllama ? process.env.OLLAMA_MODEL_NAME as string : "gpt-3.5-turbo",
-          temperature: 0.1,
-          streaming: true,
-        });
+      configuration: {
+        baseURL: shouldUseOllama
+          ? (process.env.OLLAMA_BASE_URL as string)
+          : "https://api.openai.com/v1",
+        apiKey: shouldUseOllama
+          ? ("ollama" as string)
+          : process.env.OPENAI_API_KEY,
+      },
+      modelName: shouldUseOllama
+        ? (process.env.OLLAMA_MODEL_NAME as string)
+        : "gpt-3.5-turbo",
+      temperature: 0.1,
+      streaming: true,
+    });
 
     const model = new ChatOpenAI({
       configuration: {
-        baseURL: shouldUseOllama ? process.env.OLLAMA_BASE_URL as string : "https://api.openai.com/v1",
-        apiKey: shouldUseOllama ? "ollama" as string : process.env.OPENAI_API_KEY,
+        baseURL: shouldUseOllama
+          ? (process.env.OLLAMA_BASE_URL as string)
+          : "https://api.openai.com/v1",
+        apiKey: shouldUseOllama
+          ? ("ollama" as string)
+          : process.env.OPENAI_API_KEY,
       },
-        modelName: shouldUseOllama ? process.env.OLLAMA_MODEL_NAME as string : "gpt-3.5-turbo",
-        temperature: 0.5,
-        streaming: true,
-      });
+      modelName: shouldUseOllama
+        ? (process.env.OLLAMA_MODEL_NAME as string)
+        : "gpt-3.5-turbo",
+      temperature: 0.5,
+      streaming: true,
+    });
 
     const openaiEmbeddings = new OpenAIEmbeddings({
-        openAIApiKey: process.env.OPENAI_API_KEY as string,
-        modelName: "text-embedding-ada-002",
-      });
+      openAIApiKey: process.env.OPENAI_API_KEY as string,
+      modelName: "text-embedding-ada-002",
+    });
     const ollamaEmbeddings = new OllamaEmbeddings({
-        model: process.env.OLLAMA_EMBEDDINGS_NAME as string,
-        baseUrl: process.env.OLLAMA_EMBEDDINGS_URL as string,
-      });
+      model: process.env.OLLAMA_EMBEDDINGS_NAME as string,
+      baseUrl: process.env.OLLAMA_EMBEDDINGS_URL as string,
+    });
 
     const embeddings = shouldUseOllama ? ollamaEmbeddings : openaiEmbeddings;
-    
+
     const store = new SupabaseVectorStore(embeddings, {
       client,
       tableName: "documents",
@@ -161,7 +178,7 @@ export async function POST(req: Request) {
       data
     );
   } catch (error) {
-    console.log(error)
-    return Response.json({ error: error}, { status: 500 });
+    console.log(error);
+    return Response.json({ error: error }, { status: 500 });
   }
 }
